@@ -267,6 +267,7 @@
     <ClInclude Include="hdr\utils.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\.gitignore" />
     <None Include="ext\kiero\minhook\dll_resources\MinHook.def" />
   </ItemGroup>
   <ItemGroup>
