@@ -10,14 +10,22 @@ namespace Config
     inline bool bRest = false;
     inline bool bStrength = false;
     inline bool bHydration = false;
+    inline bool bInvisible = false;
+    inline bool bSpeed = false;
+    inline bool bJump = false;
+    inline bool bFallDamage = false;
 
     namespace Value
     {
-        inline float health = 10.f;
-        inline float stamina = 10.f;
-        inline float fullness = 10.f;
-        inline float rest = 10.f;
-        inline float strength = 10.f;
-        inline float hydration = 10.f;
+        inline float health = 50.f;
+        inline float stamina = 50.f;
+        inline float fullness = 50.f;
+        inline float rest = 50.f;
+        inline float strength = 50.f;
+        inline float hydration = 50.f;
+
+        inline float jumpHeight = 2.6f;
+        inline float runSpeed = 5.4f;
+        inline float swimSpeedMultiplier = 1.f;
     }
 }

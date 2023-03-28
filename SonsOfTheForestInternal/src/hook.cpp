@@ -47,7 +47,7 @@ namespace Hooks
             MH_Initialize();
     }
 
-    bool HooksManager::Add(std::string _name, uintptr_t _fAddress, uintptr_t _hkAddress, uintptr_t _oAddress)
+    bool HooksManager::Add(std::string _name, uintptr_t _fAddress, uintptr_t& _hkAddress, uintptr_t& _oAddress)
     {
         Hook hook = Hook(_name, _fAddress, _hkAddress, _oAddress);
 

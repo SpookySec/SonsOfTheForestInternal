@@ -17,6 +17,15 @@ void InitGui()
     ImGui_ImplDX11_Init(Globals::Gui::pDevice, Globals::Gui::pContext);
 }
 
+HRESULT EndGui(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
+{
+    kiero::shutdown();
+    Globals::Gui::pDevice->Release();
+    Globals::Gui::pContext->Release();
+    Globals::Gui::oWndProc = (WNDPROC)SetWindowLongPtr(Globals::Gui::window, GWLP_WNDPROC, (LONG_PTR)(Globals::Gui::oWndProc));
+    return Globals::Gui::oPresent(pSwapChain, SyncInterval, Flags);
+}
+
 LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
     if (true && ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
@@ -30,6 +39,9 @@ bool render = true;
 
 HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
 {
+    if (Globals::exitThread)
+        return EndGui(pSwapChain, SyncInterval, Flags);
+
     if (GetAsyncKeyState(VK_INSERT) & 1)
         render = !render;
 
@@ -111,14 +123,38 @@ void Menu(bool render)
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem("Test Tab"))
+        if (ImGui::BeginTabItem("Movement", NULL, ImGuiTabItemFlags_None))
         {
-            ImGui::Text("This is a test tab");
+            ImGui::Checkbox("No Fall Damage", &Config::bFallDamage);
+            ImGui::Checkbox("Edit Jump Height", &Config::bJump);
+            ImGui::Checkbox("Edit Movement / Swimming Speed", &Config::bSpeed);
+
+            if (Config::bJump)
+            {
+                ImGui::SliderFloat("Jump height", &Config::Value::jumpHeight, 1.f, 100.f);
+                Config::bFallDamage = true;
+            }
+
+            if (Config::bSpeed)
+            {
+                ImGui::SliderFloat("Running speed", &Config::Value::runSpeed, 1.f, 100.f);
+                ImGui::SliderFloat("Swimming speed", &Config::Value::swimSpeedMultiplier, 1.f, 100.f);
+            }
+
             ImGui::EndTabItem();
         }
 
+        if (ImGui::BeginTabItem("Misc", NULL, ImGuiTabBarFlags_None))
+        {
+            ImGui::Checkbox("Invisibility", &Config::bInvisible);
+            ImGui::EndTabItem();
+        }
+        
         ImGui::EndTabBar();
     }
+
+    if (ImGui::Button("EJECT"))
+        Globals::exitThread = true;
 
     ImGui::End();
 }

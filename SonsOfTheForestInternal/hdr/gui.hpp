@@ -14,6 +14,7 @@ typedef LRESULT(CALLBACK* WNDPROC)(HWND, UINT, WPARAM, LPARAM);
 typedef uintptr_t PTR;
 
 void InitGui();
+HRESULT EndGui(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 void Menu(bool);
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);

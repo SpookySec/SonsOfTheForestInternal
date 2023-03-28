@@ -4,3 +4,4 @@
 // DECLARE HOOK FUNCTIONS HERE
 void InitHax();
 void HackLoop();
+void StatHax();

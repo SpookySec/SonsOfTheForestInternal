@@ -4,9 +4,29 @@
 #include "../hdr/config.hpp"
 #include "../hdr/il2cpp.h"
 
+#define PTRCAST(t, a) reinterpret_cast<t>(a)
+
+void hkDoFallDamage(FirstPersonCharacter_o* __this)
+{
+    if (Config::bFallDamage)
+        return;
+
+    return oDoFallDamage(__this);
+}
+
 // DEFINE HOOK FUNCTIONS HERE
 void InitHax()
 {
+    Globals::GameAssembly = (uintptr_t)GetModuleHandle("GameAssembly.dll");
+
+    if (!Globals::initHManager)
+    {
+        if (MH_Initialize() != MH_ERROR_ALREADY_INITIALIZED)
+            MH_Initialize();
+
+        MH_CreateHook(PTRCAST(LPVOID*, Globals::GameAssembly + 0x37BAFF0), &hkDoFallDamage, (LPVOID*)&oDoFallDamage);
+        MH_EnableHook(PTRCAST(LPVOID*, Globals::GameAssembly + 0x37BAFF0));
+    }
     Globals::LocalPlayer = Unity::GameObject::Find("LocalPlayer");
     
     if (!Globals::LocalPlayer)
@@ -18,25 +38,24 @@ void InitHax()
     printf("Found local player @ 0x%p\n", Globals::LocalPlayer);
 
     Globals::Vitals = Globals::LocalPlayer->GetComponent("Vitals");
-    if (!Globals::Vitals)
-    {
-        printf("[-] Cannot find Vitals\n");
-        return;
-    }
+    Globals::PlayerVisibility = Globals::LocalPlayer->GetComponent("PlayerVisibility");
+    Globals::FirstPersonCharacter = Globals::LocalPlayer->GetComponent("FirstPersonCharacter");
 
-    printf("Found Vitals @ 0x%p\n", Globals::Vitals);
-
-    Globals::Stats::Rest = Globals::Vitals->GetPropertyValue<Unity::CObject*>("Rest");
+    Globals::Stats::Rest = Globals::Vitals->GetPropertyValue<Unity::CObject*>("Rested");
     Globals::Stats::Health = Globals::Vitals->GetPropertyValue<Unity::CObject*>("Health");
     Globals::Stats::Stamina = Globals::Vitals->GetPropertyValue<Unity::CObject*>("Stamina");
     Globals::Stats::Fullness = Globals::Vitals->GetPropertyValue<Unity::CObject*>("Fullness");
     Globals::Stats::Strength = Globals::Vitals->GetPropertyValue<Unity::CObject*>("Strength");
     Globals::Stats::Hydration = Globals::Vitals->GetPropertyValue<Unity::CObject*>("Hydration");
+
+    printf("Found PlayerVisibility @ 0x%p\n", Globals::PlayerVisibility);
+    printf("Found FirstPersonCharacter @ 0x%p\n", Globals::FirstPersonCharacter);
 }
+
 
 void HackLoop()
 {
-    if (!Globals::il2cpp_status)
+    if (!Globals::il2cppStatus)
         exit(1);
 
     if (!Globals::LocalPlayer)
@@ -46,6 +65,57 @@ void HackLoop()
         return;
     }
 
+    // Check code above lmao
+    StatHax();
+
+    if (Config::bInvisible)
+    {
+        if (Globals::PlayerVisibility)
+            Globals::PlayerVisibility->SetMemberValue<bool>("_invisible", true);
+
+        else
+            Globals::PlayerVisibility = Globals::LocalPlayer->GetComponent("PlayerVisibility");
+    }
+    else if (!Globals::ResetStats::resetVisibility)
+    {
+        Globals::ResetStats::resetVisibility = true;
+        Globals::PlayerVisibility->SetMemberValue<bool>("_invisible", false);
+    }
+
+    if (Config::bJump)
+    {
+        if (Globals::FirstPersonCharacter)
+            Globals::FirstPersonCharacter->SetMemberValue<float>("_jumpHeight", Config::Value::jumpHeight);
+
+        else
+            Globals::FirstPersonCharacter = Globals::LocalPlayer->GetComponent("FirstPersonCharacter");
+    }
+    else if (!Globals::ResetStats::resetJumpHeight)
+    {
+        Globals::ResetStats::resetJumpHeight = true;
+        Globals::FirstPersonCharacter->SetMemberValue<float>("_jumpHeight", 2.6f);
+    }
+
+    if (Config::bSpeed)
+    {
+        if (Globals::FirstPersonCharacter)
+        {
+            Globals::FirstPersonCharacter->SetMemberValue<float>("_runSpeed", Config::Value::runSpeed);
+            Globals::FirstPersonCharacter->SetMemberValue<float>("_swimSpeed", 2.f);
+            Globals::FirstPersonCharacter->SetMemberValue<float>("_swimSpeedMultiplier", Config::Value::swimSpeedMultiplier);
+        }
+        else
+            Globals::FirstPersonCharacter = Globals::LocalPlayer->GetComponent("FirstPersonCharacter");
+    }
+    else if (!Globals::ResetStats::resetSpeed)
+    {
+        Globals::ResetStats::resetSpeed = true;
+        Globals::FirstPersonCharacter->SetMemberValue<float>("_runSpeed", 5.4f);
+        Globals::FirstPersonCharacter->SetMemberValue<float>("_swimSpeedMultiplier", 1.f);
+    }
+}
+void StatHax()
+{
     // REST 
     if (Config::bRest)
     {

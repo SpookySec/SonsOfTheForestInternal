@@ -16,18 +16,18 @@
 
 #include "../ext/il2cppresolver/Il2CppResolver.hpp"
 
-void HackThread(LPVOID hModule)
+BOOL HackThread(LPVOID hModule)
 {
     FILE* fp = NULL;
-    MH_STATUS hax_status = MH_ERROR_NOT_INITIALIZED;
-    bool kiero_status = false;
+    MH_STATUS haxStatus = MH_ERROR_NOT_INITIALIZED;
+    bool kieroStatus = false;
 
     fp = CreateConsole();
     
     printf("[+] DLL injected!\n");
 
-    Globals::il2cpp_status = IL2CPP::Initialize(true);
-    if (!Globals::il2cpp_status)
+    Globals::il2cppStatus = IL2CPP::Initialize(true);
+    if (!Globals::il2cppStatus)
         exit(1);
 
     InitHax();
@@ -42,26 +42,28 @@ void HackThread(LPVOID hModule)
             {
                 printf("[+] Kiero init success\n");
                 kiero::bind(8, (void**)&Globals::Gui::oPresent, hkPresent);
-                kiero_status = true;
+                kieroStatus = true;
             }
         }
 
         catch (...) {
             printf("FAILED\n");
         }
-    } while (!kiero_status);
+    } while (!kieroStatus);
 
     printf("[+] Kiero hooks created successfully!\n");
     printf("[+] Cheat hooks created successfully!\n");
 
     //FreeConsole();
     //fclose(fp);
-    while (!GetAsyncKeyState(VK_END))
+    while (!Globals::exitThread)
         Sleep(200);
 
-    kiero::shutdown();
     MH_DisableHook(MH_ALL_HOOKS);
+    MH_RemoveHook(MH_ALL_HOOKS);
+    Sleep(200);
     FreeLibraryAndExitThread(static_cast<HMODULE>(hModule), EXIT_SUCCESS);
+    return TRUE;
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule,

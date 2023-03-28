@@ -8,15 +8,17 @@
 #include "../ext/imgui/imgui.h"
 #include "../ext/imgui/imgui_impl_win32.h"
 #include "../ext/imgui/imgui_impl_dx11.h"
-//#include "hook.hpp"
+#include "hook.hpp"
 #include "gui.hpp"
 #include "../ext/il2cppresolver/Il2CppResolver.hpp"
+#include "il2cpp.h"
 
 namespace Globals
 {
-    // Possible global vars here
-    //inline Hooks::HooksManager HookManager;
+    inline uintptr_t GameAssembly{ NULL };
     inline Unity::CGameObject* LocalPlayer;
+    inline Unity::CComponent* PlayerVisibility;
+    inline Unity::CComponent* FirstPersonCharacter;
     inline Unity::CComponent* Vitals;
 
     namespace Stats
@@ -31,12 +33,15 @@ namespace Globals
 
     namespace ResetStats
     {
+        inline bool resetVisibility = true;
         inline bool resetStamina = true;
         inline bool resetHealth = true;
         inline bool resetFullness = true;
         inline bool resetRest = true;
         inline bool resetStrength = true;
         inline bool resetHydration = true;
+        inline bool resetJumpHeight = true;
+        inline bool resetSpeed = true;
     }
 
     namespace Gui
@@ -54,5 +59,9 @@ namespace Globals
             ImGuiWindowFlags_NoCollapse;
     }
 
-    inline bool il2cpp_status = false;
+    inline bool il2cppStatus = false;
+    inline bool exitThread = false;
+    inline bool initHManager = false;
 }
+
+inline void(__fastcall* oDoFallDamage)(FirstPersonCharacter_o* __this);
