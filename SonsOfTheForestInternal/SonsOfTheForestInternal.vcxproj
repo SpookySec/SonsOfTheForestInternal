@@ -260,6 +260,8 @@
     <ClInclude Include="ext\kiero\minhook\src\hde\table64.h" />
     <ClInclude Include="ext\kiero\minhook\src\trampoline.h" />
     <ClInclude Include="hdr\config.hpp" />
+    <ClInclude Include="hdr\font_awesome.h" />
+    <ClInclude Include="hdr\font_byte.h" />
     <ClInclude Include="hdr\gui.hpp" />
     <ClInclude Include="hdr\hax.hpp" />
     <ClInclude Include="hdr\hook.hpp" />

@@ -63,5 +63,3 @@ namespace Globals
     inline bool exitThread = false;
     inline bool initHManager = false;
 }
-
-inline void(__fastcall* oDoFallDamage)(FirstPersonCharacter_o* __this);

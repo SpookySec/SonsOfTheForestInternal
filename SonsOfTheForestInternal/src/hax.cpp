@@ -6,14 +6,6 @@
 
 #define PTRCAST(t, a) reinterpret_cast<t>(a)
 
-void hkDoFallDamage(FirstPersonCharacter_o* __this)
-{
-    if (Config::bFallDamage)
-        return;
-
-    return oDoFallDamage(__this);
-}
-
 // DEFINE HOOK FUNCTIONS HERE
 void InitHax()
 {
@@ -24,8 +16,7 @@ void InitHax()
         if (MH_Initialize() != MH_ERROR_ALREADY_INITIALIZED)
             MH_Initialize();
 
-        MH_CreateHook(PTRCAST(LPVOID*, Globals::GameAssembly + 0x37BAFF0), &hkDoFallDamage, (LPVOID*)&oDoFallDamage);
-        MH_EnableHook(PTRCAST(LPVOID*, Globals::GameAssembly + 0x37BAFF0));
+        // POSSIBLE HOOKS HERE
     }
     Globals::LocalPlayer = Unity::GameObject::Find("LocalPlayer");
     
@@ -101,7 +92,7 @@ void HackLoop()
         if (Globals::FirstPersonCharacter)
         {
             Globals::FirstPersonCharacter->SetMemberValue<float>("_runSpeed", Config::Value::runSpeed);
-            Globals::FirstPersonCharacter->SetMemberValue<float>("_swimSpeed", 2.f);
+            Globals::FirstPersonCharacter->SetMemberValue<float>("_swimSpeed", Config::Value::swimSpeedMultiplier);
             Globals::FirstPersonCharacter->SetMemberValue<float>("_swimSpeedMultiplier", Config::Value::swimSpeedMultiplier);
         }
         else
@@ -113,6 +104,16 @@ void HackLoop()
         Globals::FirstPersonCharacter->SetMemberValue<float>("_runSpeed", 5.4f);
         Globals::FirstPersonCharacter->SetMemberValue<float>("_swimSpeedMultiplier", 1.f);
     }
+
+    if (Config::bFallDamage)
+    {
+        if (Globals::FirstPersonCharacter)
+            Globals::FirstPersonCharacter->SetMemberValue<bool>("_allowFallDamage", false);
+    }
+    else
+        Globals::FirstPersonCharacter->SetMemberValue<bool>("_allowFallDamage", true);
+    
+
 }
 void StatHax()
 {
