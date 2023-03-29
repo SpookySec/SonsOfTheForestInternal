@@ -61,11 +61,11 @@ void HackLoop()
 
     if (Config::bInvisible)
     {
-        if (Globals::PlayerVisibility)
-            Globals::PlayerVisibility->SetMemberValue<bool>("_invisible", true);
+        if (!Globals::PlayerVisibility)
+            return;
 
-        else
-            Globals::PlayerVisibility = Globals::LocalPlayer->GetComponent("PlayerVisibility");
+        Globals::PlayerVisibility->SetMemberValue<bool>("_invisible", true);
+        Globals::ResetStats::resetVisibility = false;
     }
     else if (!Globals::ResetStats::resetVisibility)
     {
@@ -75,11 +75,11 @@ void HackLoop()
 
     if (Config::bJump)
     {
-        if (Globals::FirstPersonCharacter)
-            Globals::FirstPersonCharacter->SetMemberValue<float>("_jumpHeight", Config::Value::jumpHeight);
+        if (!Globals::FirstPersonCharacter)
+            return;
 
-        else
-            Globals::FirstPersonCharacter = Globals::LocalPlayer->GetComponent("FirstPersonCharacter");
+        Globals::FirstPersonCharacter->SetMemberValue<float>("_jumpHeight", Config::Value::jumpHeight);
+        Globals::ResetStats::resetRest = false;
     }
     else if (!Globals::ResetStats::resetJumpHeight)
     {
@@ -89,19 +89,19 @@ void HackLoop()
 
     if (Config::bSpeed)
     {
-        if (Globals::FirstPersonCharacter)
-        {
-            Globals::FirstPersonCharacter->SetMemberValue<float>("_runSpeed", Config::Value::runSpeed);
-            Globals::FirstPersonCharacter->SetMemberValue<float>("_swimSpeed", Config::Value::swimSpeedMultiplier);
-            Globals::FirstPersonCharacter->SetMemberValue<float>("_swimSpeedMultiplier", Config::Value::swimSpeedMultiplier);
-        }
-        else
-            Globals::FirstPersonCharacter = Globals::LocalPlayer->GetComponent("FirstPersonCharacter");
+        if (!Globals::FirstPersonCharacter)
+            return;
+
+        Globals::FirstPersonCharacter->SetMemberValue<float>("_runSpeed", Config::Value::runSpeed);
+        Globals::FirstPersonCharacter->SetMemberValue<float>("_swimSpeed", Config::Value::swimSpeedMultiplier);
+        Globals::FirstPersonCharacter->SetMemberValue<float>("_swimSpeedMultiplier", Config::Value::swimSpeedMultiplier);
+        Globals::ResetStats::resetSpeed = false;
     }
     else if (!Globals::ResetStats::resetSpeed)
     {
         Globals::ResetStats::resetSpeed = true;
         Globals::FirstPersonCharacter->SetMemberValue<float>("_runSpeed", 5.4f);
+        Globals::FirstPersonCharacter->SetMemberValue<float>("_swimSpeed", 5.4f);
         Globals::FirstPersonCharacter->SetMemberValue<float>("_swimSpeedMultiplier", 1.f);
     }
 

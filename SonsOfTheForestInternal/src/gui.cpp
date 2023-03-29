@@ -2,12 +2,8 @@
 #include "../hdr/globals.hpp"
 #include "../hdr/config.hpp"
 #include "../hdr/hax.hpp"
-#include "../hdr/font_awesome.h"
-#include "../hdr/font_byte.h"
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-ImFont* bigIcons;
 
 void InitGui()
 {
@@ -23,10 +19,9 @@ void InitGui()
     //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     io.IniFilename = nullptr;
     io.LogFilename = nullptr;
+    io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\Bedstead.ttf", 18.f);
     io.Fonts->AddFontDefault();
-    io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_data, font_awesome_size, 18.0f, &icons_config, icons_ranges);
     ImGui_ImplWin32_Init(Globals::Gui::window);
-    bigIcons = io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_data, font_awesome_size, 18.01f, NULL, icons_ranges);
     ImGui_ImplDX11_Init(Globals::Gui::pDevice, Globals::Gui::pContext);
 
     ImGuiStyle* style = &ImGui::GetStyle();
@@ -157,7 +152,7 @@ void Menu(bool render)
 
     if (ImGui::BeginTabBar("Tabs", ImGuiTabBarFlags_None))
     {
-        if (ImGui::BeginTabItem(ICON_FA_HEART "Vitals", NULL, ImGuiTabItemFlags_None))
+        if (ImGui::BeginTabItem("Vitals", NULL, ImGuiTabItemFlags_None))
         {
             ImGui::Checkbox("Edit Rest", &Config::bRest);
             ImGui::Checkbox("Edit Health", &Config::bHealth);
@@ -195,14 +190,14 @@ void Menu(bool render)
 
             if (Config::bJump)
             {
-                ImGui::SliderFloat(ICON_FA_FROG "Jump height", &Config::Value::jumpHeight, 1.f, 100.f);
+                ImGui::SliderFloat("Jump height", &Config::Value::jumpHeight, 1.f, 100.f);
                 Config::bFallDamage = true;
             }
 
             if (Config::bSpeed)
             {
-                ImGui::SliderFloat(ICON_FA_RUNNING "Running speed", &Config::Value::runSpeed, 1.f, 100.f);
-                ImGui::SliderFloat(ICON_FA_FISH "Swimming speed", &Config::Value::swimSpeedMultiplier, 1.f, 100.f);
+                ImGui::SliderFloat("Running speed", &Config::Value::runSpeed, 1.f, 100.f);
+                ImGui::SliderFloat("Swimming speed", &Config::Value::swimSpeedMultiplier, 1.f, 100.f);
             }
 
             ImGui::EndTabItem();
@@ -210,15 +205,20 @@ void Menu(bool render)
 
         if (ImGui::BeginTabItem("Misc", NULL, ImGuiTabBarFlags_None))
         {
-            ImGui::Checkbox(ICON_FA_EYE_SLASH "Invisibility", &Config::bInvisible);
+            ImGui::Checkbox("Invisibility", &Config::bInvisible);
             ImGui::EndTabItem();
         }
         
         ImGui::EndTabBar();
     }
 
-    if (ImGui::Button("EJECT", ImVec2(ImGui::GetWindowContentRegionWidth() * .999, 20)))
+    ImGui::BeginChild("Eject button", ImVec2(ImGui::GetWindowContentRegionWidth()*.999, 30), false, 0);
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.3f, 0.f, 0.f, 1.f));
+    if (ImGui::Button("EJECT", ImVec2(ImGui::GetWindowContentRegionWidth()*.999, 25)))
         Globals::exitThread = true;
+
+    ImGui::PopStyleColor();
+    ImGui::EndChild();
 
     ImGui::End();
 }

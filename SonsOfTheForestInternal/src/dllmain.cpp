@@ -54,8 +54,8 @@ BOOL HackThread(LPVOID hModule)
     printf("[+] Kiero hooks created successfully!\n");
     printf("[+] Cheat hooks created successfully!\n");
 
-    //FreeConsole();
-    //fclose(fp);
+    FreeConsole();
+    fclose(fp);
     while (!Globals::exitThread)
         Sleep(200);
 
