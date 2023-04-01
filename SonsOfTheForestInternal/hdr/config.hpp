@@ -14,6 +14,9 @@ namespace Config
     inline bool bSpeed = false;
     inline bool bJump = false;
     inline bool bFallDamage = false;
+    inline bool bESP = false;
+    inline bool bESPDistance = false;
+    inline bool bGiant = false;
 
     namespace Value
     {
@@ -27,5 +30,9 @@ namespace Config
         inline float jumpHeight = 2.6f;
         inline float runSpeed = 5.4f;
         inline float swimSpeedMultiplier = 1.f;
+
+        inline float espDistance = 100.f;
+
+        inline int giantScale = 1;
     }
 }

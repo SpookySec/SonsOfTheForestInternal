@@ -4,6 +4,8 @@
 #include "../hdr/config.hpp"
 #include "../hdr/il2cpp.h"
 
+#include <cmath>
+
 #define PTRCAST(t, a) reinterpret_cast<t>(a)
 
 // DEFINE HOOK FUNCTIONS HERE
@@ -18,7 +20,13 @@ void InitHax()
 
         // POSSIBLE HOOKS HERE
     }
+
     Globals::LocalPlayer = Unity::GameObject::Find("LocalPlayer");
+    Globals::VailActorManagerParent = Unity::GameObject::Find("_VailActorManager_");
+    Globals::MainCamera = Unity::Camera::GetMain();
+
+    printf("[+] Found VailActorManagerParent @ 0x%p\n", Globals::VailActorManagerParent);
+
     
     if (!Globals::LocalPlayer)
     {
@@ -26,11 +34,14 @@ void InitHax()
         return;
     }
 
-    printf("Found local player @ 0x%p\n", Globals::LocalPlayer);
+    printf("[+] Found local player @ 0x%p\n", Globals::LocalPlayer);
 
     Globals::Vitals = Globals::LocalPlayer->GetComponent("Vitals");
     Globals::PlayerVisibility = Globals::LocalPlayer->GetComponent("PlayerVisibility");
     Globals::FirstPersonCharacter = Globals::LocalPlayer->GetComponent("FirstPersonCharacter");
+    Globals::VailActorManager = Globals::VailActorManagerParent->GetComponent("Sons.Ai.Vail.VailActorManager");
+
+    Globals::VailActors = Globals::VailActorManager->GetMemberValue<Unity::il2cppList<Unity::CComponent*>*>("_activeActors");
 
     Globals::Stats::Rest = Globals::Vitals->GetPropertyValue<Unity::CObject*>("Rested");
     Globals::Stats::Health = Globals::Vitals->GetPropertyValue<Unity::CObject*>("Health");
@@ -39,10 +50,11 @@ void InitHax()
     Globals::Stats::Strength = Globals::Vitals->GetPropertyValue<Unity::CObject*>("Strength");
     Globals::Stats::Hydration = Globals::Vitals->GetPropertyValue<Unity::CObject*>("Hydration");
 
-    printf("Found PlayerVisibility @ 0x%p\n", Globals::PlayerVisibility);
-    printf("Found FirstPersonCharacter @ 0x%p\n", Globals::FirstPersonCharacter);
+    printf("[+] Found VailActorManager @ 0x%p\n", Globals::VailActorManager);
+    printf("[+] Found PlayerVisibility @ 0x%p\n", Globals::PlayerVisibility);
+    printf("[+] Found FirstPersonCharacter @ 0x%p\n", Globals::FirstPersonCharacter);
+    printf("[+] Found List<VailActors> @ 0x%p\n", Globals::VailActors);
 }
-
 
 void HackLoop()
 {
@@ -56,8 +68,26 @@ void HackLoop()
         return;
     }
 
+    if (!Globals::VailActorManager)
+    {
+        printf("[-] Cannot find VailActorManager\n");
+        InitHax();
+        return;
+    }
+
     // Check code above lmao
     StatHax();
+
+    ESPHax();
+
+    if (Config::bGiant)
+    {
+        Globals::LocalPlayer->GetTransform()->SetLocalScale(Unity::Vector3(Config::Value::giantScale, Config::Value::giantScale, Config::Value::giantScale));
+    }
+    else
+    {
+        Globals::LocalPlayer->GetTransform()->SetLocalScale(Unity::Vector3(1.f, 1.f, 1.f));
+    }
 
     if (Config::bInvisible)
     {
@@ -114,6 +144,69 @@ void HackLoop()
         Globals::FirstPersonCharacter->SetMemberValue<bool>("_allowFallDamage", true);
     
 
+}
+
+void ESPHax()
+{
+    if (Config::bESP)
+    {
+        printf("[*] VailActors List @ 0x%p\n", Globals::VailActors);
+        //printf("ESP ENABLED\n");
+        if (!Globals::VailActors)
+        {
+            Globals::VailActors = Globals::VailActorManager->GetMemberValue<Unity::il2cppList<Unity::CComponent*>*>("_activeActors");
+            return;
+        }
+
+        for (uintptr_t u = 0U; Globals::VailActors->ToArray()->m_uMaxLength > u; ++u)
+        {
+            Unity::CComponent* VailActor = Globals::VailActors->ToArray()->operator[](u);
+
+            if (!VailActor)
+                continue;
+
+            Unity::CTransform* m_pTransform = VailActor->GetTransform();
+            Unity::Vector3 m_Position = m_pTransform->GetPosition();
+
+            if (VailActor->GetMemberValue<float>("_distanceFromTarget") <= 0.f)
+                continue;
+
+            Unity::Vector3 buffer = Globals::MainCamera->CallMethodSafe<Unity::Vector3>("WorldToScreenPoint", m_Position);
+            Unity::Vector3 localPos = Globals::LocalPlayer->GetTransform()->GetPosition();
+
+            float x1, x2, y1, y2, z1, z2;
+
+            x1 = localPos.x;
+            x2 = m_Position.x;
+
+            y1 = localPos.y;
+            y2 = m_Position.y;
+
+            z1 = localPos.z;
+            z2 = m_Position.z;
+
+            float distance = std::sqrt(std::pow(x1 - x2, 2) + std::pow(y1 - y2, 2) + std::pow(z1 - z2, 2));
+            printf("distance: %f\n", distance);
+
+            if (buffer.z < 0)
+                continue;
+
+            if (Config::bESPDistance)
+            {
+                if (distance <= Config::Value::espDistance)
+                    ImGui::GetBackgroundDrawList()->AddLine(ImVec2(1920 / 2, 0), ImVec2(buffer.x, 1080 - buffer.y), ImColor(255, 255, 255, 255), 1.5f);
+
+                continue;
+            }
+
+            ImGui::GetBackgroundDrawList()->AddLine(ImVec2(1920 / 2, 0), ImVec2(buffer.x, 1080 - buffer.y), ImColor(255, 255, 255, 255), 1.5f);
+
+
+            //printf("[*] ACTOR 0x%p (%f, %f, %f)\n", VailActor, m_Position.x, m_Position.y, m_Position.z);
+        }
+
+        Globals::VailActors = Globals::VailActorManager->GetMemberValue<Unity::il2cppList<Unity::CComponent*>*>("_activeActors");
+    }
 }
 void StatHax()
 {

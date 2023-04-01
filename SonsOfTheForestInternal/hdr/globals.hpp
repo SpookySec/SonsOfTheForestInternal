@@ -17,6 +17,10 @@ namespace Globals
 {
     inline uintptr_t GameAssembly{ NULL };
     inline Unity::CGameObject* LocalPlayer;
+    inline Unity::CGameObject* VailActorManagerParent;
+    inline Unity::il2cppList<Unity::CComponent*>* VailActors;
+    inline Unity::CCamera* MainCamera;
+    inline Unity::CComponent* VailActorManager;
     inline Unity::CComponent* PlayerVisibility;
     inline Unity::CComponent* FirstPersonCharacter;
     inline Unity::CComponent* Vitals;
