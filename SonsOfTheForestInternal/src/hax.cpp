@@ -50,6 +50,7 @@ void InitHax()
     Globals::Stats::Strength = Globals::Vitals->GetPropertyValue<Unity::CObject*>("Strength");
     Globals::Stats::Hydration = Globals::Vitals->GetPropertyValue<Unity::CObject*>("Hydration");
 
+    printf("[+] Found MainCamera @ 0x%p\n", Globals::MainCamera);
     printf("[+] Found VailActorManager @ 0x%p\n", Globals::VailActorManager);
     printf("[+] Found PlayerVisibility @ 0x%p\n", Globals::PlayerVisibility);
     printf("[+] Found FirstPersonCharacter @ 0x%p\n", Globals::FirstPersonCharacter);
@@ -150,6 +151,13 @@ void ESPHax()
 {
     if (Config::bESP)
     {
+        if (!Globals::MainCamera)
+        {
+            printf("[-] Camera not found!\n");
+            Globals::MainCamera = Unity::Camera::GetCurrent();
+            return;
+        }
+
         printf("[*] VailActors List @ 0x%p\n", Globals::VailActors);
         //printf("ESP ENABLED\n");
         if (!Globals::VailActors)
@@ -160,18 +168,64 @@ void ESPHax()
 
         for (uintptr_t u = 0U; Globals::VailActors->ToArray()->m_uMaxLength > u; ++u)
         {
-            Unity::CComponent* VailActor = Globals::VailActors->ToArray()->operator[](u);
+            Unity::Vector3 buffer{ 0,0,0 };
+            Unity::Vector3 m_Position{ 0,0,0 };
+            Unity::CComponent* VailActor{ 0 };
 
-            if (!VailActor)
+            try
+            {
+                printf("[%d] ===================\n", (int)u);
+                VailActor = Globals::VailActors->ToArray()->operator[](u);
+
+                printf("[*] VailActor @ 0x%p\n", VailActor);
+
+                if (!VailActor)
+                {
+                    Globals::VailActors->m_pListArray->RemoveAt(u);
+                    continue;
+                }
+
+                Unity::CTransform* m_pTransform = VailActor->GetTransform();
+                m_Position = m_pTransform->GetPosition();
+
+                // sometimes this value is below the world
+                //if (m_Position.y <= 0.f || m_Position.z <= 0.f)
+                //    continue;
+
+                float _distanceFromTarget = VailActor->GetMemberValue<float>("_distanceFromTarget");
+                Sleep(0.05);
+
+                printf("[*] m_pTransoform @ 0x%p ( %f, %f, %f ) distance: %f\n", m_pTransform, m_Position.x, m_Position.y, m_Position.x, _distanceFromTarget);
+
+
+                if (_distanceFromTarget <= 0.f)
+                    continue;
+
+
+
+                // literally no idea how to solve this shit
+                buffer = Globals::MainCamera->CallMethodSafe<Unity::Vector3, Unity::Vector3, int>("WorldToScreenPoint", m_Position, 2);
+            }
+            catch (...)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImColor(100, 12, 12, 255).Value);
+                if (ImGui::Begin("error", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar  | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground))
+                {
+                    ImGui::Text("You're experiencing a weird bug where the entlist is empty.\ncurrently I have no solution for this so forgive me lmao, just restart the game :)");
+                    if (ImGui::Button("SHUT DOWN"))
+                        for (; ;)
+                            exit(1);
+
+                }
+                ImGui::PopStyleColor();
+
+                ImGui::End();
+                continue;
+            }
+
+            if (buffer.y < 1.f || buffer.z < 1.f)
                 continue;
 
-            Unity::CTransform* m_pTransform = VailActor->GetTransform();
-            Unity::Vector3 m_Position = m_pTransform->GetPosition();
-
-            if (VailActor->GetMemberValue<float>("_distanceFromTarget") <= 0.f)
-                continue;
-
-            Unity::Vector3 buffer = Globals::MainCamera->CallMethodSafe<Unity::Vector3>("WorldToScreenPoint", m_Position);
             Unity::Vector3 localPos = Globals::LocalPlayer->GetTransform()->GetPosition();
 
             float x1, x2, y1, y2, z1, z2;
@@ -186,20 +240,72 @@ void ESPHax()
             z2 = m_Position.z;
 
             float distance = std::sqrt(std::pow(x1 - x2, 2) + std::pow(y1 - y2, 2) + std::pow(z1 - z2, 2));
-            printf("distance: %f\n", distance);
+            printf("[*] Distance: %f\n", distance);
 
             if (buffer.z < 0)
                 continue;
 
-            if (Config::bESPDistance)
-            {
-                if (distance <= Config::Value::espDistance)
-                    ImGui::GetBackgroundDrawList()->AddLine(ImVec2(1920 / 2, 0), ImVec2(buffer.x, 1080 - buffer.y), ImColor(255, 255, 255, 255), 1.5f);
+            Sons_Ai_Vail_VailActor_o* il2cpp_VailActor = reinterpret_cast<Sons_Ai_Vail_VailActor_o*>(VailActor);
+            int typeId = il2cpp_VailActor->fields._id;
+            printf("[*] TypeId: TypeIdString[%d] = %s\n", typeId, TypeIdString[typeId]);
 
-                continue;
-            }
+            // ENEMIES
+            if (typeId == Fingers && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == Andy && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == Danny && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == Billy && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == Baby && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == Twins && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == GoldMask && Config::bEnemies) {DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == Slug && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == MuddyFemale && Config::bEnemies) {DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == MuddyMale && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == HeavyMale && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == FatMale && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == FatFemale && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == John2 && Config::bEnemies) {DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == FacelessMale && Config::bEnemies) {DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == Demon && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == PaintedMale && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == PaintedFemale && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == Carl && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == MrPuffy && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == MissPuffy && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
 
-            ImGui::GetBackgroundDrawList()->AddLine(ImVec2(1920 / 2, 0), ImVec2(buffer.x, 1080 - buffer.y), ImColor(255, 255, 255, 255), 1.5f);
+            // PEACEFUL ANIMALS
+            if (typeId == Rabbit && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(12, 100, 12, 125)); }
+            if (typeId == Squirrel && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(12, 100, 12, 125)); }
+            if (typeId == Turtle && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(12, 100, 12, 125)); }
+            if (typeId == Seagull && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(12, 100, 12, 125)); }
+            if (typeId == Eagle && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(12, 100, 12, 125)); }
+            if (typeId == Duck && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(12, 100, 12, 125)); }
+            if (typeId == Moose && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(12, 100, 12, 125)); }
+            if (typeId == Salmon && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(12, 100, 12, 125)); }
+            if (typeId == Bat && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(12, 100, 12, 125)); }
+            if (typeId == Deer && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(12, 100, 12, 125)); }
+            if (typeId == Bluebird && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(12, 100, 12, 125)); }
+            if (typeId == Hummingbird && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(12, 100, 12, 125)); }
+            if (typeId == LandTurtle && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(12, 100, 12, 125)); }
+
+            // HOSTILE ANIMALS
+            if (typeId == Shark && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == KillerWhale && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+
+            if (typeId == Timmy && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
+            if (typeId == Robby && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
+            if (typeId == Virginia && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
+            if (typeId == Angel && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
+            if (typeId == Brandy && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
+            if (typeId == Crystal && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
+            if (typeId == Destiny && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
+
+
+            //char distance_name_buffer[64];
+
+            //snprintf(distance_name_buffer, 16, "%s\n%.1fm", TypeIdString[typeId], distance);
+
+            //ImGui::GetBackgroundDrawList()->AddLine(ImVec2(1920 / 2, 1080), ImVec2(buffer.x, (1080 - buffer.y)), ImColor(255, 255, 255, 125), 1.5f);
+            //ImGui::GetBackgroundDrawList()->AddText(ImVec2(buffer.x, 1080 - buffer.y), ImColor(255, 255, 255, 255), (const char*)distance_name_buffer);
 
 
             //printf("[*] ACTOR 0x%p (%f, %f, %f)\n", VailActor, m_Position.x, m_Position.y, m_Position.z);
@@ -208,6 +314,7 @@ void ESPHax()
         Globals::VailActors = Globals::VailActorManager->GetMemberValue<Unity::il2cppList<Unity::CComponent*>*>("_activeActors");
     }
 }
+
 void StatHax()
 {
     // REST 
@@ -305,4 +412,18 @@ void StatHax()
         float _defaultvalue = Globals::Stats::Hydration->GetMemberValue<float>("_defaultValue");
         Globals::Stats::Hydration->SetMemberValue<float>("_currentValue", _defaultvalue);
     }
+}
+
+void DrawESP(float distance, int typeId, Unity::Vector3 buffer, ImColor color)
+{
+    if (Config::bESPDistance)
+        if (distance >= Config::Value::espDistance)
+            return;
+
+    char distance_name_buffer[64];
+
+    snprintf(distance_name_buffer, 16, "%s\n%.1fm", TypeIdString[typeId], distance);
+
+    ImGui::GetBackgroundDrawList()->AddLine(ImVec2(1920 / 2, 1080), ImVec2(buffer.x, (1080 - buffer.y)), color, 1.5f);
+    ImGui::GetBackgroundDrawList()->AddText(ImVec2(buffer.x, 1080 - buffer.y), color, (const char*)distance_name_buffer);
 }

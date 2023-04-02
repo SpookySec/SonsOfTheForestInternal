@@ -14,9 +14,13 @@ namespace Config
     inline bool bSpeed = false;
     inline bool bJump = false;
     inline bool bFallDamage = false;
-    inline bool bESP = false;
     inline bool bESPDistance = false;
     inline bool bGiant = false;
+
+    inline bool bESP = false;
+    inline bool bAnimals = false;
+    inline bool bEnemies = false;
+    inline bool bNPCs = false;
 
     namespace Value
     {

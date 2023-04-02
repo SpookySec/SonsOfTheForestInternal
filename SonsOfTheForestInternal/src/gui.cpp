@@ -272,9 +272,12 @@ void Menu(bool render)
 
         if (Settings::Tab == 3)
         {
-            ImGui::Checkbox("Enable Enemy ESP", &Config::bESP);
-            ImGui::Checkbox("Edit ESP Distance", &Config::bESPDistance);
             //// ADD SOME CODE FOR SPECIFIC ESP
+            ImGui::Checkbox("Enable ESP", &Config::bESP);
+            ImGui::Checkbox("Edit ESP Distance", &Config::bESPDistance);
+            ImGui::Checkbox("Show Enemies", &Config::bEnemies);
+            ImGui::Checkbox("Show Animals", &Config::bAnimals);
+            ImGui::Checkbox("Show Friendlies", &Config::bNPCs);
 
             if (Config::bESPDistance)
                 ImGui::SliderFloat("ESP Distance", &Config::Value::espDistance, 0.f, 1000.f);
