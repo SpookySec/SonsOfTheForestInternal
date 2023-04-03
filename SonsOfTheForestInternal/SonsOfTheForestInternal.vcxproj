@@ -275,6 +275,7 @@
     <ClInclude Include="hdr\hax.hpp" />
     <ClInclude Include="hdr\hook.hpp" />
     <ClInclude Include="hdr\il2cpp.h" />
+    <ClInclude Include="hdr\stb_image.h" />
     <ClInclude Include="hdr\utils.hpp" />
   </ItemGroup>
   <ItemGroup>

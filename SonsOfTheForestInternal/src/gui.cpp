@@ -3,13 +3,17 @@
 #include "../hdr/config.hpp"
 #include "../hdr/hax.hpp"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "../hdr/stb_image.h"
+
 #include "../hdr/font_awesome.h"
 #include "../hdr/font_byte.h"
 
-#define WIDTH 800
+#define WIDTH 715
 #define HEIGHT 450
 #define BUTTON_HEIGHT 40
-#define BUTTON_RATIO 3
+#define BUTTON_RATIO 5
+#define MAP_RATIO 2.59
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -20,9 +24,59 @@ ImGuiTableColumnFlags columnFlags;
 ImFont* bedstead;
 ImFont* fontawesome;
 
+int map_image_width = 0;
+int map_image_height = 0;
+ID3D11ShaderResourceView* map_texture = NULL;
+
 namespace Settings
 {
     static int Tab = 0;
+}
+
+bool LoadTextureFromFile(const char* filename, ID3D11ShaderResourceView** out_srv, int* out_width, int* out_height)
+{
+    // Load from disk into a raw RGBA buffer
+    int image_width = 0;
+    int image_height = 0;
+    unsigned char* image_data = stbi_load(filename, &image_width, &image_height, NULL, 4);
+    if (image_data == NULL)
+        return false;
+
+    // Create texture
+    D3D11_TEXTURE2D_DESC desc;
+    ZeroMemory(&desc, sizeof(desc));
+    desc.Width = image_width;
+    desc.Height = image_height;
+    desc.MipLevels = 1;
+    desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    desc.CPUAccessFlags = 0;
+
+    ID3D11Texture2D* pTexture = NULL;
+    D3D11_SUBRESOURCE_DATA subResource;
+    subResource.pSysMem = image_data;
+    subResource.SysMemPitch = desc.Width * 4;
+    subResource.SysMemSlicePitch = 0;
+    Globals::Gui::pDevice->CreateTexture2D(&desc, &subResource, &pTexture);
+
+    // Create texture view
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+    ZeroMemory(&srvDesc, sizeof(srvDesc));
+    srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = desc.MipLevels;
+    srvDesc.Texture2D.MostDetailedMip = 0;
+    Globals::Gui::pDevice->CreateShaderResourceView(pTexture, &srvDesc, out_srv);
+    pTexture->Release();
+
+    *out_width = image_width;
+    *out_height = image_height;
+    stbi_image_free(image_data);
+
+    return true;
 }
 
 void InitGui()
@@ -103,6 +157,8 @@ void InitGui()
     //style->Colors[ImGuiCol_PlotHistogram] = ImVec4(0.40f, 0.39f, 0.38f, 0.63f);
     //style->Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.25f, 1.00f, 0.00f, 1.00f);
     //style->Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.25f, 1.00f, 0.00f, 0.43f);
+
+    bool ret = LoadTextureFromFile("C:\\Users\\spooky\\Desktop\\projects\\C++\\SonsOfTheForestInternal\\SonsOfTheForestInternal\\map.png", &map_texture, &map_image_width, &map_image_height);
 }
 
 HRESULT EndGui(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
@@ -188,20 +244,24 @@ void Menu(bool render)
 
         ImGui::PushStyleColor(ImGuiCol_Button, Settings::Tab == 1 ? active : inactive);
 
-        if (ImGui::Button(ICON_FA_HEART" VITALS  ", ImVec2(WIDTH / BUTTON_RATIO, BUTTON_HEIGHT)))
+        if (ImGui::Button(ICON_FA_HEART" VITALS  ", ImVec2(WIDTH / MAP_RATIO, BUTTON_HEIGHT)))
             Settings::Tab = 1;
 
         ImGui::PushStyleColor(ImGuiCol_Button, Settings::Tab == 2 ? active : inactive);
-        if (ImGui::Button(ICON_FA_CHILD" MOVEMENT", ImVec2(WIDTH / BUTTON_RATIO, BUTTON_HEIGHT)))
+        if (ImGui::Button(ICON_FA_CHILD" MOVEMENT", ImVec2(WIDTH / MAP_RATIO, BUTTON_HEIGHT)))
             Settings::Tab = 2;
 
         ImGui::PushStyleColor(ImGuiCol_Button, Settings::Tab == 3 ? active : inactive);
-        if (ImGui::Button(ICON_FA_EYE" ESP     ", ImVec2(WIDTH / BUTTON_RATIO, BUTTON_HEIGHT)))
+        if (ImGui::Button(ICON_FA_EYE" ESP     ", ImVec2(WIDTH / MAP_RATIO, BUTTON_HEIGHT)))
             Settings::Tab = 3;
 
         ImGui::PushStyleColor(ImGuiCol_Button, Settings::Tab == 4 ? active : inactive);
-        if (ImGui::Button(ICON_FA_ELLIPSIS_H" MISC    ", ImVec2(WIDTH / BUTTON_RATIO, BUTTON_HEIGHT)))
+        if (ImGui::Button("   \xef\x89\xb9 TELEPORT    ", ImVec2(WIDTH / MAP_RATIO, BUTTON_HEIGHT)))
             Settings::Tab = 4;
+
+        ImGui::PushStyleColor(ImGuiCol_Button, Settings::Tab == 5 ? active : inactive);
+        if (ImGui::Button(ICON_FA_ELLIPSIS_H" MISC    ", ImVec2(WIDTH / MAP_RATIO, BUTTON_HEIGHT)))
+            Settings::Tab = 5;
 
 
         ImGui::SetCursorPos(ImVec2(6, ImGui::GetWindowHeight() - (BUTTON_HEIGHT + 5)));
@@ -209,7 +269,7 @@ void Menu(bool render)
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor(120, 12, 12, 255).Value);
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImColor(130, 12, 12, 255).Value);
 
-        if (ImGui::Button("EJECT", ImVec2(WIDTH / BUTTON_RATIO, BUTTON_HEIGHT)))
+        if (ImGui::Button("EJECT", ImVec2(WIDTH / MAP_RATIO, BUTTON_HEIGHT)))
         {
             Globals::exitThread = true;
         }
@@ -219,7 +279,7 @@ void Menu(bool render)
 
         if (Settings::Tab == 1)
         {
-            ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
+            ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.4f);
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(40, BUTTON_HEIGHT - 35));
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(80, 3983));
             ImGui::Checkbox("Edit Rest", &Config::bRest);
@@ -256,9 +316,11 @@ void Menu(bool render)
             ImGui::Checkbox("No Fall Damage", &Config::bFallDamage);
             ImGui::Checkbox("Edit Jump Height", &Config::bJump);
             ImGui::Checkbox("Edit Movement / Swimming Speed", &Config::bSpeed);
-
+    
+            ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.3f);
             if (Config::bJump)
             {
+
                 ImGui::SliderFloat("Jump height", &Config::Value::jumpHeight, 1.f, 200.f, "%.1f");
                 Config::bFallDamage = true;
             }
@@ -268,22 +330,95 @@ void Menu(bool render)
                 ImGui::SliderFloat("Running speed", &Config::Value::runSpeed, 1.f, 200.f, "%.1f");
                 ImGui::SliderFloat("Swimming speed", &Config::Value::swimSpeedMultiplier, 1.f, 200.f, "%.1f");
             }
+            ImGui::PopItemWidth();
         }
 
         if (Settings::Tab == 3)
         {
             //// ADD SOME CODE FOR SPECIFIC ESP
             ImGui::Checkbox("Enable ESP", &Config::bESP);
-            ImGui::Checkbox("Edit ESP Distance", &Config::bESPDistance);
             ImGui::Checkbox("Show Enemies", &Config::bEnemies);
             ImGui::Checkbox("Show Animals", &Config::bAnimals);
             ImGui::Checkbox("Show Friendlies", &Config::bNPCs);
+            ImGui::Checkbox("Show GPS", &Config::bPosition);
+            ImGui::Checkbox("Edit ESP Distance", &Config::bESPDistance);
 
             if (Config::bESPDistance)
                 ImGui::SliderFloat("ESP Distance", &Config::Value::espDistance, 0.f, 1000.f);
+
+            ImGui::NewLine();
+            ImGui::Text("Visuals");
+            ImGui::Checkbox("Draw Lines", &Config::bLines);
+
         }
 
         if (Settings::Tab == 4)
+        {
+            auto pos = ImGui::GetWindowPos();
+            ImGui::SetNextWindowSize(ImVec2(422, 414), ImGuiCond_Once);
+            ImGui::SetNextWindowPos(ImVec2((pos.x + 12) + (WIDTH / MAP_RATIO), pos.y + 32), ImGuiCond_Always);
+            if (ImGui::Begin("map", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar))
+            {
+                ImGui::SetNextWindowSize(ImVec2(420, 414), ImGuiCond_Once);
+                ImGui::SetNextWindowPos(ImVec2((pos.x + 11) + (WIDTH / MAP_RATIO), pos.y + 32), ImGuiCond_Always);
+                if (ImGui::Begin("map buttons", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar))
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImColor(0, 0, 0, 0).Value);
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImColor(0, 0, 0, 0).Value);
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor(100, 100, 100, 45).Value);
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImColor(100, 12, 12, 255).Value);
+                    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.2f);
+
+                    // ADD PINS HERE
+                    ImGui::SetCursorPos(ImVec2(55, 30));
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##GPS1"))
+                        Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-1340, 102, 1412));
+
+                    ImGui::SetCursorPos(ImVec2(160, 25));
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##CAVE1"))
+                        Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-421, 17, 1518));
+
+                    ImGui::SetCursorPos(ImVec2(155, 110));
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##PRINTER1"))
+                        Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-474, 88, 710));
+
+                    ImGui::SetCursorPos(ImVec2(135, 145));
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##GPS2"))
+                        Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-623, 154, 383));
+
+                    ImGui::SetCursorPos(ImVec2(145, 172));
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##CAVE2"))
+                        Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-530, 198, 124));
+
+                    ImGui::SetCursorPos(ImVec2(80, 175));
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##CAVE3"))
+                        Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-1189, 69, 130));
+
+                    ImGui::SetCursorPos(ImVec2(330, 255));
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##CAVE4"))
+                        Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(1233, 241, -654));
+
+                    ImGui::SetCursorPos(ImVec2(90, 300));
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##PRINTER2"))
+                        Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-1133, 281, -1103));
+
+                    ImGui::SetCursorPos(ImVec2(145, 250));
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##CAVE5"))
+                        Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-536, 285, -631));
+
+
+                    ImGui::PopStyleColor(4);
+                    ImGui::PopStyleVar();
+                    ImGui::End();
+                }
+                //ImGui::SetCursorPos(ImVec2((pos.x + 15) + (WIDTH / BUTTON_RATIO), pos.y + 32));
+                ImGui::Image((void*)map_texture, ImVec2(421, 412));
+                //ImGui::Image((void*)my_texture, ImVec2((pos.x + 15) + (WIDTH / BUTTON_RATIO), pos.y + 32), ImVec2((pos.x + 415 + 18) + WIDTH / BUTTON_RATIO, pos.y + 415 + 30));
+                ImGui::End();
+            }
+        }
+
+        if (Settings::Tab == 5)
         {
             ImGui::Checkbox("Invisibility", &Config::bInvisible);
             ImGui::Checkbox("Giant Mode", &Config::bGiant);

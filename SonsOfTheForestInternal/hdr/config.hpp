@@ -22,6 +22,9 @@ namespace Config
     inline bool bEnemies = false;
     inline bool bNPCs = false;
 
+    inline bool bLines;
+    inline bool bPosition;
+
     namespace Value
     {
         inline float health = 50.f;

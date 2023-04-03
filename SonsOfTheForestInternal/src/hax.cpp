@@ -145,6 +145,18 @@ void HackLoop()
         Globals::FirstPersonCharacter->SetMemberValue<bool>("_allowFallDamage", true);
     
 
+    if (Config::bPosition)
+    {
+        Unity::Vector3 playerPosition = Globals::LocalPlayer->GetTransform()->GetPosition();
+
+        char position[64];
+
+        snprintf(position, 64, "(\n\tx: %.2f,\n\ty: %.2f,\n\tz: %.2f\n)", playerPosition.x, playerPosition.y, playerPosition.z);
+
+        ImGui::GetForegroundDrawList()->AddText(ImVec2(15, 15), ImColor(255, 255, 255, 255), (const char*)position);
+
+    }
+
 }
 
 void ESPHax()
@@ -271,6 +283,8 @@ void ESPHax()
             if (typeId == Carl && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
             if (typeId == MrPuffy && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
             if (typeId == MissPuffy && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == Crystal && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == Destiny && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
 
             // PEACEFUL ANIMALS
             if (typeId == Rabbit && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(12, 100, 12, 125)); }
@@ -296,8 +310,6 @@ void ESPHax()
             if (typeId == Virginia && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
             if (typeId == Angel && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
             if (typeId == Brandy && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
-            if (typeId == Crystal && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
-            if (typeId == Destiny && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
 
 
             //char distance_name_buffer[64];
@@ -424,6 +436,8 @@ void DrawESP(float distance, int typeId, Unity::Vector3 buffer, ImColor color)
 
     snprintf(distance_name_buffer, 16, "%s\n%.1fm", TypeIdString[typeId], distance);
 
-    ImGui::GetBackgroundDrawList()->AddLine(ImVec2(1920 / 2, 1080), ImVec2(buffer.x, (1080 - buffer.y)), color, 1.5f);
+    if (Config::bLines)
+        ImGui::GetBackgroundDrawList()->AddLine(ImVec2(1920 / 2, 1080), ImVec2(buffer.x, (1080 - buffer.y)), color, 1.5f);
+
     ImGui::GetBackgroundDrawList()->AddText(ImVec2(buffer.x, 1080 - buffer.y), color, (const char*)distance_name_buffer);
 }
