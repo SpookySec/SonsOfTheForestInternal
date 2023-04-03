@@ -285,6 +285,9 @@ void ESPHax()
             if (typeId == MissPuffy && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
             if (typeId == Crystal && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
             if (typeId == Destiny && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == Angel && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == Brandy && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
+            if (typeId == Timmy && Config::bEnemies) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
 
             // PEACEFUL ANIMALS
             if (typeId == Rabbit && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(12, 100, 12, 125)); }
@@ -305,11 +308,8 @@ void ESPHax()
             if (typeId == Shark && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
             if (typeId == KillerWhale && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
 
-            if (typeId == Timmy && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
             if (typeId == Robby && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
             if (typeId == Virginia && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
-            if (typeId == Angel && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
-            if (typeId == Brandy && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
 
 
             //char distance_name_buffer[64];

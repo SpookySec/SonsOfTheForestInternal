@@ -371,39 +371,39 @@ void Menu(bool render)
 
                     // ADD PINS HERE
                     ImGui::SetCursorPos(ImVec2(55, 30));
-                    if (ImGui::Button(ICON_FA_MAP_PIN"##GPS1"))
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##GPS1") && Globals::LocalPlayer)
                         Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-1340, 102, 1412));
 
                     ImGui::SetCursorPos(ImVec2(160, 25));
-                    if (ImGui::Button(ICON_FA_MAP_PIN"##CAVE1"))
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##CAVE1") && Globals::LocalPlayer)
                         Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-421, 17, 1518));
 
                     ImGui::SetCursorPos(ImVec2(155, 110));
-                    if (ImGui::Button(ICON_FA_MAP_PIN"##PRINTER1"))
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##PRINTER1") && Globals::LocalPlayer)
                         Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-474, 88, 710));
 
                     ImGui::SetCursorPos(ImVec2(135, 145));
-                    if (ImGui::Button(ICON_FA_MAP_PIN"##GPS2"))
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##GPS2") && Globals::LocalPlayer)
                         Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-623, 154, 383));
 
                     ImGui::SetCursorPos(ImVec2(145, 172));
-                    if (ImGui::Button(ICON_FA_MAP_PIN"##CAVE2"))
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##CAVE2") && Globals::LocalPlayer)
                         Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-530, 198, 124));
 
                     ImGui::SetCursorPos(ImVec2(80, 175));
-                    if (ImGui::Button(ICON_FA_MAP_PIN"##CAVE3"))
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##CAVE3") && Globals::LocalPlayer)
                         Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-1189, 69, 130));
 
                     ImGui::SetCursorPos(ImVec2(330, 255));
-                    if (ImGui::Button(ICON_FA_MAP_PIN"##CAVE4"))
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##CAVE4") && Globals::LocalPlayer)
                         Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(1233, 241, -654));
 
                     ImGui::SetCursorPos(ImVec2(90, 300));
-                    if (ImGui::Button(ICON_FA_MAP_PIN"##PRINTER2"))
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##PRINTER2") && Globals::LocalPlayer)
                         Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-1133, 281, -1103));
 
                     ImGui::SetCursorPos(ImVec2(145, 250));
-                    if (ImGui::Button(ICON_FA_MAP_PIN"##CAVE5"))
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##CAVE5") && Globals::LocalPlayer)
                         Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-536, 285, -631));
 
 
