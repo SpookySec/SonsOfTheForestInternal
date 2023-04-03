@@ -47,12 +47,13 @@ Use any injector, the game has no anti cheat so even Process Hacker's DLL inject
 A compiled DLL can be found under `build/` in this repo, statically compiled so injection should be smooth.
 
 ## Screenshots
-![Vitals](img/menu2.png)
+### ESP with distance, name, type, lines, and GPS coords.
+![ESP](img/menu2.png)
 
 --- 
-
-![Movement](img/menu3.png)
+### Edit vitals in memory such as health, stamina, hunger, rest etc...
+![Vitals](img/menu3.png)
 
 ---
-
-![Misc](img/menu1.png)
+### A never seen before image of the map with clickable pins to teleport you to interesting landmarks!
+![Map](img/menu1.png)
