@@ -385,9 +385,13 @@ void Menu(bool render)
                     ImGui::SetCursorPos(ImVec2(97, 77));
                     if (ImGui::Button(ICON_FA_MAP_PIN"##PRINTER2") && Globals::LocalPlayer)
                         Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-1014, 100, 1024));
+                        
+                    ImGui::SetCursorPos(ImVec2(10, 130));
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##GPS2") && Globals::LocalPlayer)
+                        Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-1796, 16, 577));
 
                     ImGui::SetCursorPos(ImVec2(135, 145));
-                    if (ImGui::Button(ICON_FA_MAP_PIN"##GPS2") && Globals::LocalPlayer)
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##GPS3") && Globals::LocalPlayer)
                         Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-623, 154, 383));
 
                     ImGui::SetCursorPos(ImVec2(145, 172));
