@@ -4,10 +4,12 @@
 #include "../hdr/hax.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "../hdr/stb_image.h"
+#include "../ext/stb_image.h"
 
-#include "../hdr/font_awesome.h"
-#include "../hdr/font_byte.h"
+#include "../ext/font_awesome.h"
+#include "../ext/font_byte.h"
+
+#include "../ext/ini.h"
 
 #define WIDTH 715
 #define HEIGHT 450

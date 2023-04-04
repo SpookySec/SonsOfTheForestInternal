@@ -308,6 +308,7 @@ void ESPHax()
             if (typeId == Shark && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
             if (typeId == KillerWhale && Config::bAnimals) { DrawESP(distance, typeId, buffer, ImColor(100, 12, 12, 125)); }
 
+            // NPCs
             if (typeId == Robby && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
             if (typeId == Virginia && Config::bNPCs) { DrawESP(distance, typeId, buffer, ImColor(255, 255, 255, 125)); }
 
@@ -428,6 +429,8 @@ void StatHax()
 
 void DrawESP(float distance, int typeId, Unity::Vector3 buffer, ImColor color)
 {
+    auto size = ImGui::GetIO().DisplaySize;
+
     if (Config::bESPDistance)
         if (distance >= Config::Value::espDistance)
             return;
@@ -437,7 +440,7 @@ void DrawESP(float distance, int typeId, Unity::Vector3 buffer, ImColor color)
     snprintf(distance_name_buffer, 16, "%s\n%.1fm", TypeIdString[typeId], distance);
 
     if (Config::bLines)
-        ImGui::GetBackgroundDrawList()->AddLine(ImVec2(1920 / 2, 1080), ImVec2(buffer.x, (1080 - buffer.y)), color, 1.5f);
+        ImGui::GetBackgroundDrawList()->AddLine(ImVec2(size.x / 2, size.y), ImVec2(buffer.x, (size.y - buffer.y)), color, 1.5f);
 
-    ImGui::GetBackgroundDrawList()->AddText(ImVec2(buffer.x, 1080 - buffer.y), color, (const char*)distance_name_buffer);
+    ImGui::GetBackgroundDrawList()->AddText(ImVec2(buffer.x, size.y - buffer.y), color, (const char*)distance_name_buffer);
 }

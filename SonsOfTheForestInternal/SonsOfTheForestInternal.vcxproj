@@ -257,6 +257,7 @@
     <ClInclude Include="ext\imgui\imstb_rectpack.h" />
     <ClInclude Include="ext\imgui\imstb_textedit.h" />
     <ClInclude Include="ext\imgui\imstb_truetype.h" />
+    <ClInclude Include="ext\ini.h" />
     <ClInclude Include="ext\kiero\kiero.h" />
     <ClInclude Include="ext\kiero\minhook\dll_resources\resource.h" />
     <ClInclude Include="ext\kiero\minhook\include\MinHook.h" />
@@ -269,13 +270,13 @@
     <ClInclude Include="ext\kiero\minhook\src\trampoline.h" />
     <ClInclude Include="ext\std_image.h" />
     <ClInclude Include="hdr\config.hpp" />
-    <ClInclude Include="hdr\font_awesome.h" />
-    <ClInclude Include="hdr\font_byte.h" />
+    <ClInclude Include="ext\font_awesome.h" />
+    <ClInclude Include="ext\font_byte.h" />
     <ClInclude Include="hdr\gui.hpp" />
     <ClInclude Include="hdr\hax.hpp" />
     <ClInclude Include="hdr\hook.hpp" />
     <ClInclude Include="hdr\il2cpp.h" />
-    <ClInclude Include="hdr\stb_image.h" />
+    <ClInclude Include="ext\stb_image.h" />
     <ClInclude Include="hdr\utils.hpp" />
   </ItemGroup>
   <ItemGroup>
