@@ -10,7 +10,7 @@
 #include "../ext/font_byte.h"
 
 #include "../ext/ini.h"
-
+#include "../MapPng.h"
 #define WIDTH 715
 #define HEIGHT 450
 #define BUTTON_HEIGHT 40
@@ -81,6 +81,52 @@ bool LoadTextureFromFile(const char* filename, ID3D11ShaderResourceView** out_sr
     return true;
 }
 
+bool LoadTextureFromMemory(const void* data, int size, ID3D11ShaderResourceView** out_srv, ID3D11Device* g_pd3dDevice, int* out_width, int* out_height)
+{
+    // Load from disk into a raw RGBA buffer
+    int image_width = 0;
+    int image_height = 0;
+    unsigned char* image_data = stbi_load_from_memory((const stbi_uc*)data, size, &image_width, &image_height, NULL, 4);
+    if (image_data == NULL)
+        return false;
+
+    // Create texture
+    D3D11_TEXTURE2D_DESC desc;
+    ZeroMemory(&desc, sizeof(desc));
+    desc.Width = image_width;
+    desc.Height = image_height;
+    desc.MipLevels = 1;
+    desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    desc.CPUAccessFlags = 0;
+
+    ID3D11Texture2D* pTexture = NULL;
+    D3D11_SUBRESOURCE_DATA subResource;
+    subResource.pSysMem = image_data;
+    subResource.SysMemPitch = desc.Width * 4;
+    subResource.SysMemSlicePitch = 0;
+    g_pd3dDevice->CreateTexture2D(&desc, &subResource, &pTexture);
+
+    // Create texture view
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+    ZeroMemory(&srvDesc, sizeof(srvDesc));
+    srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = desc.MipLevels;
+    srvDesc.Texture2D.MostDetailedMip = 0;
+    g_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, out_srv);
+    pTexture->Release();
+
+    *out_width = image_width;
+    *out_height = image_height;
+    stbi_image_free(image_data);
+
+    return true;
+}
+
 void InitGui()
 {
     static const ImWchar icons_ranges[] = { 0xf000, 0xf3ff, 0 };
@@ -99,7 +145,7 @@ void InitGui()
     ImGui_ImplWin32_Init(Globals::Gui::window);
     ImGui_ImplDX11_Init(Globals::Gui::pDevice, Globals::Gui::pContext);
 
-    bedstead = io.Fonts->AddFontFromFileTTF("C:\\Users\\spooky\\AppData\\Local\\Microsoft\\Windows\\Fonts\\Bedstead.ttf", 18.f, NULL, NULL);
+    bedstead = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\msyh.ttc", 18.f, NULL, NULL);
     fontawesome = io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_data, font_awesome_size, 18.0f, &icons_config, icons_ranges);
     io.Fonts->AddFontDefault();
     ImGuiStyle* style = &ImGui::GetStyle();
@@ -159,8 +205,15 @@ void InitGui()
     //style->Colors[ImGuiCol_PlotHistogram] = ImVec4(0.40f, 0.39f, 0.38f, 0.63f);
     //style->Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.25f, 1.00f, 0.00f, 1.00f);
     //style->Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.25f, 1.00f, 0.00f, 0.43f);
+   
+    //bool ret = LoadTextureFromFile("C:\\Users\\TFONE\\source\\repos\\SonsOfTheForestInternal\\SonsOfTheForestInternal\\map.png", &map_texture, &map_image_width, &map_image_height);
 
-    bool ret = LoadTextureFromFile("C:\\Users\\spooky\\Desktop\\projects\\C++\\SonsOfTheForestInternal\\SonsOfTheForestInternal\\map.png", &map_texture, &map_image_width, &map_image_height);
+    bool ret = LoadTextureFromMemory(MapPngData,
+        sizeof(MapPngData),
+        &map_texture,
+        Globals::Gui::pDevice, 
+        &map_image_width,
+        &map_image_height);
 }
 
 HRESULT EndGui(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
@@ -276,7 +329,7 @@ void Menu(bool render)
             Globals::exitThread = true;
         }
 
-        ImGui::PopStyleColor(6);
+        ImGui::PopStyleColor(8);
         ImGui::TableNextColumn();
 
         if (Settings::Tab == 1)
@@ -383,9 +436,17 @@ void Menu(bool render)
                     ImGui::SetCursorPos(ImVec2(155, 110));
                     if (ImGui::Button(ICON_FA_MAP_PIN"##PRINTER1") && Globals::LocalPlayer)
                         Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-474, 88, 710));
+                    
+                    ImGui::SetCursorPos(ImVec2(97, 77));
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##PRINTER2") && Globals::LocalPlayer)
+                        Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-1014, 100, 1024));
+                        
+                    ImGui::SetCursorPos(ImVec2(10, 130));
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##GPS2") && Globals::LocalPlayer)
+                        Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-1796, 16, 577));
 
                     ImGui::SetCursorPos(ImVec2(135, 145));
-                    if (ImGui::Button(ICON_FA_MAP_PIN"##GPS2") && Globals::LocalPlayer)
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##GPS3") && Globals::LocalPlayer)
                         Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-623, 154, 383));
 
                     ImGui::SetCursorPos(ImVec2(145, 172));
@@ -401,7 +462,7 @@ void Menu(bool render)
                         Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(1233, 241, -654));
 
                     ImGui::SetCursorPos(ImVec2(90, 300));
-                    if (ImGui::Button(ICON_FA_MAP_PIN"##PRINTER2") && Globals::LocalPlayer)
+                    if (ImGui::Button(ICON_FA_MAP_PIN"##PRINTER3") && Globals::LocalPlayer)
                         Globals::LocalPlayer->GetTransform()->SetPosition(Unity::Vector3(-1133, 281, -1103));
 
                     ImGui::SetCursorPos(ImVec2(145, 250));

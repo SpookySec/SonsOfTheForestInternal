@@ -74,6 +74,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)build\</OutDir>
     <IntDir>.\build\intermediates\</IntDir>
+    <IncludePath>C:\Users\TFONE\source\repos\SonsOfTheForestInternal\SonsOfTheForestInternal\ext\kiero\minhook\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)build\</OutDir>
@@ -86,6 +87,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)build\</OutDir>
     <IntDir>.\build\intermediates\</IntDir>
+    <IncludePath>C:\Users\TFONE\source\repos\SonsOfTheForestInternal\SonsOfTheForestInternal\ext\kiero\minhook\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <VcpkgUseStatic>true</VcpkgUseStatic>
@@ -278,6 +280,7 @@
     <ClInclude Include="hdr\il2cpp.h" />
     <ClInclude Include="ext\stb_image.h" />
     <ClInclude Include="hdr\utils.hpp" />
+    <ClInclude Include="MapPng.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.gitignore" />

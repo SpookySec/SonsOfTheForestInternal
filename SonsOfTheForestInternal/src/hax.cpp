@@ -166,10 +166,10 @@ void ESPHax()
         if (!Globals::MainCamera)
         {
             printf("[-] Camera not found!\n");
-            Globals::MainCamera = Unity::Camera::GetCurrent();
+            Globals::MainCamera = Unity::Camera::GetMain();//Use GetMain directly because current does not exist
             return;
         }
-
+        
         printf("[*] VailActors List @ 0x%p\n", Globals::VailActors);
         //printf("ESP ENABLED\n");
         if (!Globals::VailActors)
@@ -214,7 +214,7 @@ void ESPHax()
                     continue;
 
 
-
+                 
                 // literally no idea how to solve this shit
                 buffer = Globals::MainCamera->CallMethodSafe<Unity::Vector3, Unity::Vector3, int>("WorldToScreenPoint", m_Position, 2);
             }
