@@ -34,7 +34,10 @@ namespace Config
 ```
 
 ## TODO
-- [ ] Add ESP
+- [x] Add ESP
+- [x] Add teleportation map
+- [x] Config file (JSON or INI) to configure map and font file paths
+- [x] Use config file to allow the user to add new pins to the map (for their base)
 
 ## Compiling
 Honestly if you don't know how to compile a C++ project, then maybe you shouldn't be here.
